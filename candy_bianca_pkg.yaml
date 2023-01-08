@@ -1,0 +1,484 @@
+
+#################################################################
+#                                                               #
+#                    Packages/washing CANDY BIANCA              #
+#                                                               #
+#################################################################
+
+#################################################################
+#                                                               #
+#                          Customize                            #
+#                                                               #
+#################################################################
+
+homeassistant:
+  customize:
+    ################################################
+    ## Node Anchors
+    ################################################
+    package.node_anchors:
+      customize: &customize
+        package: 'washing_machine'
+
+      expose: &expose
+        <<: *customize
+        haaska_hidden: false
+        homebridge_hidden: false
+
+#################################################################
+#                                                               #
+#                            GROUP                              #
+#                                                               #
+#################################################################  
+
+group:
+  washing_machine:
+    name: 'Washing Machine'
+    entities:
+      - sensor.candy_bianca_WiFiStatus
+      - sensor.candy_bianca_Err
+      - sensor.candy_bianca_MachMd
+      - sensor.candy_bianca_MachMd_int
+      - sensor.candy_bianca_Pr
+      - sensor.candy_bianca_PrCode
+      - sensor.candy_bianca_SLevel
+      - sensor.candy_bianca_PrPh
+      - sensor.candy_bianca_program
+      - sensor.candy_bianca_program_short
+      - sensor.candy_bianca_Temp
+      - sensor.candy_bianca_SpinSp
+      - sensor.candy_bianca_Steam
+      - sensor.candy_bianca_DryT
+      - sensor.candy_bianca_DelVal
+      - sensor.candy_bianca_RemTime
+
+
+#################################################################
+#                                                               #
+#                      INPUT TEXT & SELECT                      #
+#                                                               #
+#################################################################   
+
+input_text:
+
+  candy_bianca_ip:
+    name: Candy Bianca IP
+    icon: 'mdi:ip-network-outline'
+    initial: 192.168.10.181
+    
+timer:
+  candy_bianca_washing_end:
+    name: Candy Bianca end Timer
+    duration: "00:01:00"
+
+input_select:
+
+  candy_phase:
+    name: Washing machine phase
+    options:
+      - Unavailable
+      - Prewash
+      - Wash
+      - Rinse
+      - End
+      - Drying
+      - Error
+      - Steam
+      - Good Night
+    icon: 'mdi:state-machine'
+    initial: Unavailable
+    
+  candy_wifi:
+    name: Washing machine wifi status
+    options:
+      - No-Wifi
+      - Wifi
+      - Unavailable
+    icon: 'mdi:wifi'
+    initial: Unavailable
+    
+  candy_errors:
+    name: Washing machine errors
+    options:
+      - Good
+      - Alert
+      - Unavailable
+    icon: 'mdi:washing-machine-alert'
+    initial: Unavailable
+    
+  candy_status:
+    name: Washing machine status
+    options:
+      - Unavailable
+      - Stopped
+      - Washing
+      - Unknown_3
+      - Paused
+      - Delayed
+      - Unknown_6
+      - Finished
+    icon: 'mdi:washing-machine'
+    initial: Stopped    
+    
+  candy_drymode:
+    name: Washing machine dry mode
+    options:
+      - None
+      - Extra asciutto
+      - Pronto stiro
+      - Pronto armadio
+    icon: 'mdi:tumble-dryer'
+    initial: None
+    
+  candy_spin:
+    name: Washing machine spin
+    options:
+      - '0'
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+      - 10
+    icon: 'mdi:cached'
+    initial: 8
+    
+  candy_temp:
+    name: Washing machine temp
+    options:
+      - '0'
+      - 20
+      - 30
+      - 40
+    icon: 'mdi:thermometer'
+    initial: 20  
+    
+  candy_program_label:
+    name: Washing machine Program
+    options:
+      - Perfect Rapid 14 Min.
+      - Perfect Rapid 30 Min.
+      - Perfect Rapid 44 Min.
+      - Perfect Rapid 59 Min.
+      - Asciugatura Misti (Extra Asciutto)
+      - Asciugatura Misti (Pronto Stiro)
+      - Asciugatura Misti (Pronto Armadio)
+      - Other
+    icon: 'mdi:washing-machine'
+    initial: Perfect Rapid 14 Min.      
+    
+  candy_program_url:
+    name: Washing machine Program
+    options:
+      - 'PrNm=16&PrCode=7&PrStr=Rapido 14 Min.&SLevTgt=1&Dry=0'
+      - 'PrNm=16&PrCode=7&PrStr=Rapido 30 Min.&SLevTgt=2&Dry=0'
+      - 'PrNm=16&PrCode=7&PrStr=Rapido 44 Min.&SLevTgt=3&Dry=0'
+      - 'PrNm=15&PrCode=8&PrStr=Rapido 59 Min&SLevTgt=0&Dry=0'
+      - 'PrNm=11&PrCode=77&PrStr=Asciuga Misti&SLevTgt=0&Dry=1'
+      - 'PrNm=11&PrCode=77&PrStr=Asciuga Misti&SLevTgt=0&Dry=2'
+      - 'PrNm=11&PrCode=77&PrStr=Asciuga Misti&SLevTgt=0&Dry=3'
+      - 'Other'
+    icon: 'mdi:washing-machine'
+    initial: Other       
+
+  candy_delay_val:
+    name: Washing machine Program
+    options:
+      - '0'
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 8
+      - 10
+      - 12
+    icon: 'mdi:timer-sand-empty'
+    initial: '0'     
+
+#################################################################
+#                                                               #
+#                            SENSOR                             #
+#                                                               #
+################################################################# 
+
+rest:
+  - resource: "http://192.168.10.181/http-read.json?encrypted=2"
+    scan_interval: 1200
+    sensor:
+      - name: candy_bianca_WiFiStatus
+        unique_id: candy_bianca_id0
+        icon: 'mdi:wifi'
+        value_template: >-
+            {% set tmp = value_json['statusLavatrice']['WiFiStatus'] | int %}
+            {{ state_attr('input_select.candy_wifi', 'options')[tmp] }}
+            
+      - name: candy_bianca_Err
+        unique_id: candy_bianca_id2
+        icon: 'mdi:washing-machine-alert'
+        value_template: >-
+            {% set tmp = value_json['statusLavatrice']['Err'] | int %}
+            {{ state_attr('input_select.candy_errors', 'options')[tmp] }}
+            
+      - name: candy_bianca_MachMd
+        unique_id: candy_bianca_id3
+        icon: 'mdi:washing-machine'
+        value_template: >-
+            {% set tmp = value_json['statusLavatrice']['MachMd'] | int %}
+            {{ state_attr('input_select.candy_status', 'options')[tmp] }}
+            
+      - name: candy_bianca_MachMd_int
+        unique_id: candy_bianca_id4
+        icon: 'mdi:washing-machine'
+        value_template: "{{ value_json['statusLavatrice']['MachMd'] | int }}"
+        
+      - name: candy_bianca_Pr
+        unique_id: candy_bianca_id5
+        icon: 'mdi:numeric'
+        value_template: "{{ value_json['statusLavatrice']['Pr'] }}"
+        
+      - name: candy_bianca_PrCode
+        unique_id: candy_bianca_id6
+        icon: 'mdi:numeric'
+        value_template: "{{ value_json['statusLavatrice']['PrCode'] }}"
+        
+      - name: candy_bianca_SLevel
+        unique_id: candy_bianca_id7
+        icon: 'mdi:liquid-spot'
+        value_template: "{{ value_json['statusLavatrice']['SLevel'] }}"
+        
+      - name: candy_bianca_PrPh
+        unique_id: candy_bianca_id8
+        icon: 'mdi:state-machine'
+        value_template: >-
+            {% set tmp = value_json['statusLavatrice']['PrPh'] | int %}
+            {{ state_attr('input_select.candy_phase', 'options')[tmp] }}
+            
+      - name: candy_bianca_program
+        unique_id: candy_bianca_id9
+        icon: 'mdi:washing-machine'
+        value_template: >-
+            {% set code = value_json['statusLavatrice']['PrCode'] | int %}
+            {% set pr = value_json['statusLavatrice']['Pr'] | int %}
+            {% set lvl = value_json['statusLavatrice']['SLevel'] | int %}
+            {% set dry = value_json['statusLavatrice']['DryT'] | int %}
+
+            {% if ((code == 7) and (pr == 16) and (lvl == 1)) %}
+            Perfect Rapid 14 Min.
+            {% elif ((code == 7) and (pr == 16) and (lvl == 2)) %}
+            Perfect Rapid 30 Min.
+            {% elif ((code == 7) and (pr == 16) and (lvl == 3)) %}
+            Perfect Rapid 44 Min.
+            {% elif ((code == 8) and (pr == 15)) %}
+            Perfect Rapid 59 Min.
+            {% elif ((code == 77) and (pr == 11) and (dry == 1)) %}
+            Asciugatura Misti (Extra Asciutto)
+            {% elif ((code == 77) and (pr == 11) and (dry == 2)) %}
+            Asciugatura Misti (Pronto Stiro)
+            {% elif ((code == 77) and (pr == 11) and (dry == 3)) %}
+            Asciugatura Misti (Pronto Armadio)
+            {% else %}
+            Other
+            {% endif %}
+            
+      - name: candy_bianca_program_short
+        unique_id: candy_bianca_id10
+        icon: 'mdi:washing-machine'
+        value_template: >-
+            {% set code = value_json['statusLavatrice']['PrCode'] | int %}
+            {% set pr = value_json['statusLavatrice']['Pr'] | int %}
+            {% set lvl = value_json['statusLavatrice']['SLevel'] | int %}
+            {% set dry = value_json['statusLavatrice']['DryT'] | int %}
+
+            {% if ((code == 7) and (pr == 16) and (lvl == 1)) %}
+            Rapid 14
+            {% elif ((code == 7) and (pr == 16) and (lvl == 2)) %}
+            Rapid 30
+            {% elif ((code == 7) and (pr == 16) and (lvl == 3)) %}
+            Rapid 44
+            {% elif ((code == 8) and (pr == 15)) %}
+            Rapid 59
+            {% elif ((code == 77) and (pr == 11)) %}
+            Drying
+            {% else %}
+            Other
+            {% endif %}
+            
+      - name: candy_bianca_Temp
+        unique_id: candy_bianca_id11
+        icon: 'mdi:thermometer'
+        value_template: "{{ value_json['statusLavatrice']['Temp'] | int }}"
+        
+      - name: candy_bianca_SpinSp
+        unique_id: candy_bianca_id12
+        icon: 'mdi:cached'
+        value_template: "{{ value_json['statusLavatrice']['SpinSp'] | int }}"
+        
+      - name: candy_bianca_Steam
+        unique_id: candy_bianca_id13
+        icon: 'mdi:weather-dust'
+        value_template: "{{ value_json['statusLavatrice']['Steam'] | int }}"
+        
+      - name: candy_bianca_DryT
+        unique_id: candy_bianca_id14
+        icon: 'mdi:tumble-dryer'
+        value_template: >-
+            {% set tmp = value_json['statusLavatrice']['DryT'] | int %}
+            {{ state_attr('input_select.candy_drymode', 'options')[tmp] }}
+            
+      - name: candy_bianca_DelVal
+        unique_id: candy_bianca_id15
+        icon: 'mdi:timer-sand-empty'
+        value_template: "{{ ((value_json['statusLavatrice']['DelVal'] | int) / 60 ) | int }}"
+        
+      - name: candy_bianca_RemTime
+        unique_id: candy_bianca_id16
+        icon: 'mdi:timer-outline'
+        value_template: "{{ ((value_json['statusLavatrice']['RemTime'] | int) / 60 ) | int }}"
+        
+      - name: candy_bianca_update_time
+        unique_id: candy_bianca_id17
+        icon: 'mdi:update'
+        value_template: "{{ now() }}"
+        
+
+
+#################################################################
+#                                                               #
+#                          COMMAND                              #
+#                                                               #
+#################################################################
+
+rest_command:
+
+  candy_bianca_http_write_stop:
+    url: http://{{ states('input_text.candy_bianca_ip') }}/http-write.json?encrypted=0&Write=1&StSt=0&DelMd=0
+    method: get
+  
+  candy_bianca_http_write_run:
+    url: http://{{ states('input_text.candy_bianca_ip') }}/http-write.json?encrypted=0&data=Write=1&StSt=1&{{ state_attr('input_select.candy_program_url', 'options') [(state_attr('input_select.candy_program_label', 'options').index( states('input_select.candy_program_label') ))] }}&TmpTgt={{ states('input_select.candy_temp') }}&SpdTgt={{ states('input_select.candy_spin') }}&DelVl={{states('input_select.candy_delay_val') }}
+    method: get
+    
+#################################################################
+#                                                               #
+#                          AUTOMATION                           #
+#                                                               #
+#################################################################
+
+
+automation:
+
+    - id: candy_bianca_COMMAND__washing_run
+      initial_state: true
+      alias: candy_bianca_COMMAND__washing_run
+      description: "send to washin machine WASH command"
+      trigger: []
+      condition: []
+      action:
+        - service: rest_command.candy_bianca_http_write_run
+          data: {}
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 3
+            milliseconds: 0
+        - service: homeassistant.update_entity
+          entity_id: sensor.candy_bianca_MachMd
+          
+    - id: candy_bianca_COMMAND__washing_stop
+      initial_state: true
+      alias: candy_bianca_COMMAND__washing_stop
+      description: "send to washing machine STOP command"
+      trigger: []
+      condition: []
+      action:
+        - service: rest_command.candy_bianca_http_write_stop
+          data: {}
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 3
+            milliseconds: 0
+        - service: homeassistant.update_entity
+          entity_id: sensor.candy_bianca_MachMd
+          
+    - id: candy_bianca_CHECK_washing_end
+      initial_state: true
+      alias: candy_bianca_CHECK_washing_end
+      description: "when washing is finished send notification to all devices"
+      trigger:
+        - platform: state
+          entity_id:
+           - sensor.candy_bianca_machmd_int
+          to: 7
+      condition: []
+      action:
+        - service: notify.notify
+          data:
+            title: La lavasciuga ha finito
+            message: La lavasciuga ha terminato il programma {{ states('sensor.candy_bianca_program_short')}}
+            
+    - id: candy_bianca_TIMER__start_wash
+      initial_state: true
+      alias: candy_bianca_TIMER__start_wash
+      description: "Start timer to know when the washing machine will finish the operations"
+      trigger:
+        - platform: state
+          entity_id:
+           - sensor.candy_bianca_MachMd
+          to: Washing
+      condition: []
+      action:            
+        - service: timer.start
+          data:
+            duration: "{{ states('sensor.candy_bianca_remtime') | int *60 }}"
+          target:
+            entity_id: timer.candy_bianca_washing_end
+
+    - id: candy_bianca_TIMER__end_wash
+      initial_state: true
+      alias: candy_bianca_TIMER__end_wash
+      description: "when the timer is expired update all washin machine sensors. This action maybe start fire the automation 'candy_bianca_washing_end'"
+      trigger:
+        - platform: state
+          entity_id:
+            - timer.candy_bianca_washing_end
+          from: active
+          to: idle
+      condition: []
+      action:            
+        - service: homeassistant.update_entity
+          entity_id: sensor.candy_bianca_MachM
+          
+    - id: candy_bianca__CHECK__update_remtime_restart_TIMER
+      initial_state: true
+      alias: candy_bianca__CHECK__update_remtime_restart_TIMER
+      description: "when the candy_bianca_remtime_value changed stop the timer and restart it with another value"
+      trigger:
+        - platform: state
+          entity_id:
+            - sensor.candy_bianca_remtime
+          enabled: true
+      condition: []
+      action:
+        - if:
+            - condition: template
+              value_template: "{{ states(\"sensor.candy_bianca_MachMd\") == \"Washing\" }}"
+          then:
+            - service: notify.mobile_app_s21_paolo
+              data:
+                message: prova reset timer {{ sensor.candy_bianca_remtime }}
+            - service: timer.cancel
+              data: {}
+              target:
+                entity_id: timer.candy_bianca_washing_end
+            - service: timer.start
+              data:
+                duration: "{{ states('sensor.candy_bianca_remtime') | int *60 }}"
+              target:
+                entity_id: timer.candy_bianca_washing_end
+
+
+     
