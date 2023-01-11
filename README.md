@@ -3,13 +3,12 @@
 This is my personal package of Candy Bianca Integration and works with BWD 596PH3/5-S model.
 
 Below the list of functionality:
- - Get status of washing --> work
- - Get the program --> work
- - Get the rem time --> work
- - Get the temperature --> work
- - Get the spin speed --> work
- - Send STOP Washing COMMAND --> work
- - Send RUN Washing COMMAND --> work
+ - Get status of washing --> Tested & Works
+ - Get the program --> Tested & Works
+ - Get the rem time --> Tested & Works
+ - Get the temperature --> Tested & Works
+ - Get the spin speed --> Tested & Works
+ - Send STOP Washing COMMAND --> Tested & Works
+ - Send RUN Washing COMMAND --> Tested & Works
 
-
-
+I have set only 4-5 washing program, the others can be retrieved "sniffing" the network traffic of own smartphone.
