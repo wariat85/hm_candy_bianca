@@ -1,4 +1,4 @@
-# Ccandy Bianca Package (model BWD 596PH3/5-S)
+# Candy Bianca Package (model BWD 596PH3/5-S)
 
 This is my personal package of Candy Bianca Integration and works with BWD 596PH3/5-S model.
 
